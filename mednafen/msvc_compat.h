@@ -41,7 +41,6 @@ typedef int ssize_t;
 #define lseek _lseek
 
 #include <tchar.h>
-#define strlen _tcslen
 
 # define S_IRUSR  S_IREAD                      /* read, user */
 # define S_IWUSR  S_IWRITE                     /* write, user */
