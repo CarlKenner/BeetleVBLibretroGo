@@ -5,7 +5,8 @@ namespace VRVB {
 
     extern uint16_t input_buf[];
 
-
+    extern bool g_cartridge_ram_modified;
+    extern uint32_t g_last_save_time;
 
     extern void (__cdecl *audio_cb)(int16_t *SoundBuf, int32_t SoundBufSize);
 

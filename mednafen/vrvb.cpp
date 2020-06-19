@@ -625,6 +625,7 @@ void MDFN_FASTCALL MemWrite8(v810_timestamp_t &timestamp, uint32 A, uint8 V) {
     case 6:
       if (GPRAM)
         GPRAM[A & GPRAM_Mask] = V;
+      VRVB::g_cartridge_ram_modified = true;
       break;
 
     case 7: // ROM, no writing allowed!
@@ -835,6 +836,8 @@ static MDFNGI *MDFNI_LoadGame(const uint8_t *data, size_t size) {
 namespace VRVB {
 
 uint16_t input_buf[MAX_PLAYERS];
+bool g_cartridge_ram_modified = false;
+uint32_t g_last_save_time = 0;
 void(__cdecl* audio_cb)(int16_t* SoundBuf, int32_t SoundBufSize) = nullptr;
 void(__cdecl* video_cb)(const void* data, unsigned width, unsigned height) = nullptr;
 
@@ -849,6 +852,8 @@ void Reset() {
 }
 
 void LoadRom(const uint8_t *data, size_t size) {
+  g_cartridge_ram_modified = false;
+
   overscan = false;
 
   setting_vb_anaglyph_preset = 0;
