@@ -835,6 +835,8 @@ static MDFNGI *MDFNI_LoadGame(const uint8_t *data, size_t size) {
 namespace VRVB {
 
 uint16_t input_buf[MAX_PLAYERS];
+void(__cdecl* audio_cb)(int16_t* SoundBuf, int32_t SoundBufSize) = nullptr;
+void(__cdecl* video_cb)(const void* data, unsigned width, unsigned height) = nullptr;
 
 void Init() {
   VBINPUT_SetInput(0, "gamepad", &input_buf[0]);

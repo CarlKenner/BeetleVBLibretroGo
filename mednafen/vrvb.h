@@ -1,4 +1,4 @@
-
+#pragma once
 #include <functional>
 
 namespace VRVB {
@@ -7,9 +7,9 @@ namespace VRVB {
 
 
 
-    void (*audio_cb)(int16_t *SoundBuf, int32_t SoundBufSize);
+    extern void (__cdecl *audio_cb)(int16_t *SoundBuf, int32_t SoundBufSize);
 
-    void (*video_cb)(const void *data, unsigned width, unsigned height);
+    extern void (__cdecl *video_cb)(const void *data, unsigned width, unsigned height);
 
     void Init();
 
