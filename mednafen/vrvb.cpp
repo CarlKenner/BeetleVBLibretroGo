@@ -911,7 +911,7 @@ void Run() {
   int32 height = spec.DisplayRect.h;
 
   // 32bpp
-  const void *pix = surf->pixels8;
+  const void *pix = surf->pixels;
   // video_cb(pix, width, height, FB_WIDTH << 2);
 
   VRVB::audio_cb(spec.SoundBuf, spec.SoundBufSize);
