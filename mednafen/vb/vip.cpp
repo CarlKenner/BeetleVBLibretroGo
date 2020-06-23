@@ -20,13 +20,16 @@
 #include "../video/surface.h"
 #include <math.h>
 
+bool g_debug_show_world[32]{};
+bool g_bg_tiles_modified[0x20000 / sizeof(uint16)]{};
+
 static inline void VIP_DBGMSG(const char *format, ...)
 {
 }
 
 static uint8 FB[2][2][0x6000];
-static uint16 CHR_RAM[0x8000 / sizeof(uint16)];
-static uint16 DRAM[0x20000 / sizeof(uint16)];
+uint16 CHR_RAM[0x8000 / sizeof(uint16)];
+uint16 DRAM[0x20000 / sizeof(uint16)];
 
 // Helper functions for the V810 VIP RAM read/write handlers.
 //  "Memory Array 16 (Write/Read) (16/8)"
@@ -72,8 +75,8 @@ static INLINE uint8 VIP_MA16R8(uint16 *array, const uint32 v810_address)
 static uint16 InterruptPending;
 static uint16 InterruptEnable;
 
-static uint8 BRTA, BRTB, BRTC, REST;
-static uint8 Repeat;
+uint8 BRTA, BRTB, BRTC, REST;
+uint8 Repeat;
 
 static void CopyFBColumnToTarget_Anaglyph(void) NO_INLINE;
 static void CopyFBColumnToTarget_AnaglyphSlow(void) NO_INLINE;
@@ -82,27 +85,27 @@ static void CopyFBColumnToTarget_SideBySide(void) NO_INLINE;
 static void CopyFBColumnToTarget_VLI(void) NO_INLINE;
 static void CopyFBColumnToTarget_HLI(void) NO_INLINE;
 static void (*CopyFBColumnToTarget)(void) = NULL;
-static float VBLEDOnScale;
-static uint32 VB3DMode;
-static uint32 VB3DReverse;
-static uint32 VBPrescale;
-static uint32 VBSBS_Separation;
-static uint32 HLILUT[256];
-static uint32 ColorLUT[2][256];
-static int32 BrightnessCache[4];
-static uint32 BrightCLUT[2][4];
+float VBLEDOnScale;
+uint32 VB3DMode;
+uint32 VB3DReverse;
+uint32 VBPrescale;
+uint32 VBSBS_Separation;
+uint32 HLILUT[256];
+uint32 ColorLUT[2][256];
+int32 BrightnessCache[4];
+uint32 BrightCLUT[2][4];
 
-static double ColorLUTNoGC[2][256][3];
-static uint32 AnaSlowColorLUT[256][256];
+double ColorLUTNoGC[2][256][3];
+uint32 AnaSlowColorLUT[256][256];
 
 // A few settings:
-static bool InstantDisplayHack;
-static bool AllowDrawSkip;
+bool InstantDisplayHack;
+bool AllowDrawSkip;
 
-static bool VidSettingsDirty;
-static bool ParallaxDisabled;
-static uint32 Anaglyph_Colors[2];
-static uint32 Default_Color;
+bool VidSettingsDirty;
+bool ParallaxDisabled;
+uint32 Anaglyph_Colors[2];
+uint32 Default_Color;
 
 static void MakeColorLUT(const MDFN_PixelFormat &format)
 {
@@ -339,19 +342,19 @@ void VIP_SetAllowDrawSkip(bool val)
 }
 
 
-static uint16 FRMCYC;
+uint16 FRMCYC;
 
-static uint16 DPCTRL;
-static bool DisplayActive;
+uint16 DPCTRL;
+bool DisplayActive;
 
 #define XPCTRL_XP_RST	0x0001
 #define XPCTRL_XP_EN	0x0002
-static uint16 XPCTRL;
-static uint16 SBCMP;	// Derived from XPCTRL
+uint16 XPCTRL;
+uint16 SBCMP;	// Derived from XPCTRL
 
-static uint16 SPT[4];	// SPT0~SPT3, 5f848~5f84e
-static uint16 GPLT[4];
-static uint8 GPLT_Cache[4][4];
+uint16 SPT[4];	// SPT0~SPT3, 5f848~5f84e
+uint16 GPLT[4];
+uint8 GPLT_Cache[4][4];
 
 static INLINE void Recalc_GPLT_Cache(int which)
 {
@@ -371,26 +374,26 @@ static INLINE void Recalc_JPLT_Cache(int which)
 }
 
 
-static uint16 BKCOL;
+uint16 BKCOL;
 
 static int32 CalcNextEvent(void);
 
-static int32 last_ts;
+int32 last_ts;
 
-static int32 Column;
-static int32 ColumnCounter;
+int32 Column;
+int32 ColumnCounter;
 
-static int32 DisplayRegion;
-static bool DisplayFB;
+int32 DisplayRegion;
+bool DisplayFB;
 
-static int32 GameFrameCounter;
+int32 GameFrameCounter;
 
-static int32 DrawingCounter;
-static bool DrawingActive;
-static bool DrawingFB;
-static uint32 DrawingBlock;
-static int32 SB_Latch;
-static int32 SBOUT_InactiveTime;
+int32 DrawingCounter;
+bool DrawingActive;
+bool DrawingFB;
+uint32 DrawingBlock;
+int32 SB_Latch;
+int32 SBOUT_InactiveTime;
 
 //static uint8 CTA_L, CTA_R;
 
@@ -410,6 +413,7 @@ static void CheckIRQ(void)
 
 bool VIP_Init(void)
 {
+   memset(g_debug_show_world, true, 32);
    InstantDisplayHack = false;
    AllowDrawSkip = false;
    ParallaxDisabled = false;
@@ -800,6 +804,7 @@ void VIP_Write8(int32 &timestamp, uint32 A, uint8 V)
       case 0x2:
       case 0x3:
          VIP_MA16W8(DRAM, A & 0x1FFFF, V);
+         g_bg_tiles_modified[(A & 0x1FFFF) >> 1] = true;
          break;
 
       case 0x4:
@@ -849,6 +854,7 @@ void VIP_Write16(int32 &timestamp, uint32 A, uint16 V)
       case 0x2:
       case 0x3:
          VIP_MA16W16(DRAM, A & 0x1FFFF, V);
+         g_bg_tiles_modified[(A & 0x1FFFF) >> 1] = true;
          break;
       case 0x4:
       case 0x5:

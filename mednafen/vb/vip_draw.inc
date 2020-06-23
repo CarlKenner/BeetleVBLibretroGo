@@ -425,7 +425,8 @@ void VIP_DrawBlock(uint8 block_no, uint8 *fb_l, uint8 *fb_r)
     if(!lron[0] || !lron[1])
      printf("Bad OBJ World? %d(%d/%d) %d~%d\n", world, lron[0], lron[1], SPT[obj_search_which], obj_search_which ? (SPT[obj_search_which - 1] + 1) : 0);
     
-    DrawOBJ(fb, (block_no * 8) + y, lron);
+    if (g_debug_show_world[world])
+      DrawOBJ(fb, (block_no * 8) + y, lron);
    }
    else if(bgm == BGM_AFFINE)
    {
@@ -435,7 +436,8 @@ void VIP_DrawBlock(uint8 block_no, uint8 *fb_l, uint8 *fb_r)
     {
      if(lron[lr])
      {
-      DrawAffine(fb[lr], (block_no * 8) + y, lr, param_base, bgmap_base * 4096, over, overplane_char, scx, scy,
+       if (g_debug_show_world[world])
+         DrawAffine(fb[lr], (block_no * 8) + y, lr, param_base, bgmap_base * 4096, over, overplane_char, scx, scy,
                         gx + (lr ? gp : -gp), gy, window_width, window_height);
      }
     }
@@ -459,7 +461,8 @@ void VIP_DrawBlock(uint8 block_no, uint8 *fb_l, uint8 *fb_r)
      if(bgm == 1)	// HBias
       srcX += (int16)DRAM[(param_base + (((RealY - DestY) * 2) | lr)) & 0xFFFF];
 
-     DrawBG(fb[lr], RealY, lr, bgmap_base, over, overplane_char, (int32)(int16)srcX, (int32)(int16)srcY, scx, scy, DestX, DestY, window_width, window_height);
+     if (g_debug_show_world[world])
+       DrawBG(fb[lr], RealY, lr, bgmap_base, over, overplane_char, (int32)(int16)srcX, (int32)(int16)srcY, scx, scy, DestX, DestY, window_width, window_height);
     }
    }
   }
