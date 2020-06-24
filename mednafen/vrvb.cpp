@@ -883,7 +883,7 @@ void Run() {
 
   EmulateSpecStruct spec = {0};
   spec.surface = surf;
-  spec.SoundRate = 44100;
+  spec.SoundRate = 48000;
   spec.SoundBuf = sound_buf;
   spec.LineWidths = rects;
   spec.SoundBufMaxSize = sizeof(sound_buf) / 2;
